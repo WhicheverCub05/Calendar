@@ -69,7 +69,7 @@ class UI:
         if os.path.isfile(file_path):
             # add engineers from here
             engineer_soup = wp.open_file_from_path(file_path)
-            engineer_list = wp.create_engineer_list(engineer_soup)
+            engineer_list = wp.create_test_engineer_list(engineer_soup)
 
             # add engineer rows in the main_frame
             for engineer in engineer_list:
