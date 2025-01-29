@@ -2,6 +2,7 @@ import os
 import random
 from bs4 import BeautifulSoup as bs
 from obj import engineer
+from obj import job
 
 
 def open_test_file():
@@ -62,16 +63,6 @@ def create_engineer_list(data:bs):
     engineer_list = []
 
     calendar_container_class = 'sc-300e6012-0 kVaTLA'
-
-    engineer_container_class = 'sc-8d378678-0 jGCHpv'
-
-    engineer_li_id = '67df1661-a600-4601-878a-795459aeaf0c'
-
-
-    start_time_box_class = 'sc-ad0a9d27-0 jeLybI'
-    start_time_tag_class = 'sc-bkcml6-0 gcTrkp tako-component '
-
-    engineer_calendar_container_class = 'sc-ef45b3be-1 dUHnUe'
     
     engineer_meta_container_class = 'sc-65d29e01-0 bOhfoX'
     engineer_name_contianer_class = 'sc-c7982388-1 fJzbCV'
@@ -79,39 +70,49 @@ def create_engineer_list(data:bs):
     engineer_address_container_class = 'sc-c7982388-1 kLwNDD'
     engineer_address_text_tag = 'span' # 0
 
-    engineer_schedule_container_class = 'sc-306u1c-0 kSNedy tako-component sc-6bd3894b-2 hYESoc'
+    calander_container = data.find("div", class_=calendar_container_class)
 
-    break_time_tag_class = 'sc-bkcml6-0 gcTrkp tako-component sc-c86dab9f-0 hZkeFu'
-
-    job_container_class = 'sc-2e24d968-0 sYvUM'
-
-    job_title_container_class = 'sc-5fe5ba4b-1 jgssQk'
-    job_length_and_location_container_class = 'sc-5fe5ba4b-1 jgssQk'
-
-    job_continer_text_class = 'sc-bkcml6-0 gcTrkp tako-component '
-
-    job_id_container_class = 'sc-5fe5ba4b-1 hBFpsR'
-    job_id_text_class = 'sc-bkcml6-0 gcTrkp tako-component '
-
-    calander_container = data.select(f'.{calendar_container_class}')
-
-    engineer_container_list = calander_container.select('li') 
+    engineer_container_list = calander_container.find_all("li", class_='sc-294f72b7-0 hUAXfA') 
 
     for engineer_row in engineer_container_list:
         
-        engineer_meta_container = engineer_row.select(f'.{engineer_meta_container_class}')[0]
-        name = engineer_meta_container.select(f'.{engineer_name_contianer_class}')[0].select(engineer_name_text_tag)[0]
-        address = engineer_meta_container.select(f'.{engineer_address_container_class}')[0].select(engineer_address_text_tag)[0]
+        engineer_meta_container = engineer_row.select_one("div", class_=engineer_meta_container_class)
+        name = engineer_meta_container.select_one("div", class_=engineer_name_contianer_class).select_one(engineer_name_text_tag).text
+        address = engineer_meta_container.select_one("div", class_=engineer_address_container_class).select_one(engineer_address_text_tag).text
 
         tmp_engineer = engineer.Engineer(full_name=name, address=address)
 
-        engineer_schedule_container = bs.soup.select(f'.{engineer_schedule_container_class}')
-        engineer_jobs_containter_list = engineer_schedule_container.select(f'{job_container_class}')
+        engineer_schedule_container = engineer_row.find("div", class_="sc-ef45b3be-1 dUHnUe")
+        
+        # print(engineer_schedule_container.prettify())
 
-        job_counter = len(engineer_jobs_containter_list)
-        print(f'Engineer: {name} has {job_counter} jobs')
+        engineer_jobs_containter_list = engineer_schedule_container.select('[class="sc-2e24d968-0 sYvUM"]')
+
+        job_counter = 0
+
+        if engineer_jobs_containter_list == []:
+            continue
+
         for job_container in engineer_jobs_containter_list:
-            pass
+            
+            if job_container.select_one("p", class_="sc-bkcml6-0 aqmIf tako-component ") == None:
+                continue
+            
+            job_details = job_container.select("p", class_="sc-bkcml6-0 gcTrkp tako-component ")
+
+            tmp_job = job.Job()
+            
+            if len(job_details) >= 4:
+                tmp_job.description = job_details[0].text
+                tmp_job.duration = job_details[1].text
+                tmp_job.location = job_details[2].text
+                tmp_job.id = job_details[3].text
+
+                tmp_engineer.add_job(tmp_job)
+                job_counter += 1
+
+
+        print(f'Engineer: {name} has {job_counter} jobs')
 
         engineer_list.append(tmp_engineer)
 
