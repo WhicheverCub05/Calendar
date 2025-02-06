@@ -111,7 +111,6 @@ def create_engineer_list(data:bs):
                 tmp_engineer.add_job(tmp_job)
                 job_counter += 1
 
-
         print(f'Engineer: {name} has {job_counter} jobs')
 
         engineer_list.append(tmp_engineer)

@@ -12,9 +12,12 @@ import web_parser.web_parser as wp
 import os
 
 # https://www.blog.pythonlibrary.org/2012/07/26/tkinter-how-to-show-hide-a-window/
+# https://tkdocs.com/tutorial/grid.html
+
 
 class UI:
     input_file_l = None
+    engineers = []
     def __init__(self, master):
         self.root = master
         self.root.title("Octo-py")
@@ -69,19 +72,25 @@ class UI:
         if os.path.isfile(file_path):
             # add engineers from here
             engineer_soup = wp.open_file_from_path(file_path)
-            engineer_list = wp.create_test_engineer_list(engineer_soup)
-
+            engineer_list = wp.create_engineer_list(engineer_soup)
             # add engineer rows in the main_frame
             for engineer in engineer_list:
+                self.engineers.append(engineer)
                 self.add_engineer_row(parent=self.main_frame.grid,engineer=engineer)
+                
+                for job in engineer.jobs:
+                    pass
         else:
             print("file is innaccessable")
 
         print("dropped")
         
 
-    def set_schedule(self, schedule:Schedule):
+    def add_job_to_row(self, row, column, job):
         # add all the rows and columns one after the other
+        # create job Class thing
+        job_box = JobBox(job)
+        self.main_frame.grid(row=row, column=column)
         pass
         
     def add_engineer_row(self, parent:tk.Widget, engineer:Engineer):
@@ -91,39 +100,43 @@ class UI:
             parent (tkinter.Widget): the parent that has the grid
             engineer (Engineer): and engineer class object 
         """
-        parent.tk_focusFollowsMouse()
-        
+        tmp_engineer_box = EngineerBox(parent, engineer)
+        tmp_engineer_box.grid(column=0, row=len(self.engineers)-1)
+        print(f"adding engineer {str(engineer.name)} to grid")
 
         pass
 
 
 class EngineerBox(tk.Frame):
-    def __init__(self, parent, row, engineer: Engineer):
-        super().__init__(parent=parent)
-        self.main_frame_row = row
-        self.bd = "00ff00"
-        self.size = "50x50"
-        self.name = engineer.name
-        self.address = engineer.address
+    def __init__(self, container, engineer: Engineer):
+        super().__init__(self, container=container)
+        self.config(height=50, width=50, bd="00ff00")
+        self.grid(row=0, column=0)
 
-        self.name_label = tk.Label(self, text=self.name)
-        self.address_label = tk.Label(self, text=self.address)
-        self.name_label.pack()
-        self.address_label.pack()
-        # self.main_frame_row.pack()
-        print(f"Engineer {engineer.__str__()} added")
+        self.name_label = tk.Label(self, text=engineer.name)
+        self.address_label = tk.Label(self, text=engineer.address)
+        
+        self.name_label.grid(row=0, column=0)
+        self.address_label.grid(row=1, column=0)
         
 
     def collapse(self):
         self.size = "50x15"
         # all labels that show details can be hidden
 
+class JobBox(tk.Frame):
+    def __init__(self, container, job:Job):
+        super().__init__(self, container=container)
+        self.config(height=50, width=70, bd="ff0000")
+        self.grid(column=0, row=0)
+        
+        self.description_label = tk.Label(self, text=job.description)
+        self.location_label = tk.Label(self, job.location)
+        self.duration_label = tk.Label(self, text=job.duration)
+        self.id_label = tk.Label(self, text=job.id)
 
-
-class EngineerRow(tk.Grid):
-    def __init__(self, parent, row, engineer: Engineer):
-        super().__init__(parent=parent)
-        self.bd = "ff00f0"
-        self.size = "50x200"
-
+        self.description_label.grid(row=0, column=0)
+        self.location_label.grid(row=1, column=0)
+        self.duration_label.grid(row=2, column=0)
+        self.id_label.grid(row=3, column=0)
         

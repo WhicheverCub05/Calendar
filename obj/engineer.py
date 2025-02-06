@@ -1,4 +1,5 @@
 # class definition for an Engineer
+from obj import job
 
 class Engineer(object):
     counter = 0
@@ -8,11 +9,12 @@ class Engineer(object):
         self.name = full_name
         self.address = address
         self.counter += 1
+        self.jobs = []
 
 
     @property
     def name(self):
-        return self.name
+        return self._name
 
 
     @name.setter
@@ -35,9 +37,17 @@ class Engineer(object):
 
     @property
     def address(self):
-        return self.address
+        return self._address
 
 
     @address.setter
     def address(self, address:str):
-        self.address = address.upper()
+        self._address = address.upper()
+
+    
+    def add_job(self, job:job.Job):
+        self.jobs.append(job)
+
+    
+    def get_all_jobs(self):
+        return self.jobs
