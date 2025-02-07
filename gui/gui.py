@@ -15,49 +15,28 @@ import os
 # https://tkdocs.com/tutorial/grid.html
 
 
-class UI:
+class UI(TkinterDnD.Tk):
     input_file_l = None
     engineers = []
-    def __init__(self, master):
-        self.root = master
-        self.root.title("Octo-py")
+    def __init__(self):
+        super().__init__()
+        self.title("Octo-p y")
 
         self.geometry = "700x350"
-        self.root.minsize(500, 300)
-        self.root.maxsize(800, 400)
-        # self.root.iconbitmap("add one later")
-        # self.drag_and_drop_label = tk.Label(text="Drag and drop html file into this window")
+        self.minsize(500, 300)
+        self.maxsize(800, 800)
         
-        self.main_frame = tk.Frame(self.root, bg="slate blue", height=300)
-        self.main_frame.grid(row=0, column=0, sticky=("nsew"))
+        self.configure(background="slate blue")
 
-        self.root.columnconfigure(0, weight=1)
-        self.root.rowconfigure(0, weight=1)
-
-        input_label_stat = "Waiting"
-        self.input_file_l = tk.Label(self.main_frame, text=input_label_stat, border=2)
-        self.input_file_l.grid(column=0, row=0)
-
-        self.main_frame.drop_target_register(DND_FILES)
-        self.main_frame.dnd_bind("<<Drop>>", self.drop_inside_frame)
+        #self.canvas = CanvasFrame(self)
+        self.drop_target_register(DND_FILES)
+        self.dnd_bind("<<Drop>>", self.drop_inside_frame)
+    
+        self.input_file_l = tk.Label(self, text="Waiting", border=2)
         
+        self.input_file_l.grid(row=0, column=0)
+        self.mainloop()
 
-        """
-        self.feet = tk.StringVar()
-        self.feet_entry=ttk.Entry(self.main_frame, width=140, textvariable=self.feet)
-        self.feet_entry.grid(column=2, row=3, sticky=("nsew"), paddy=2)
-
-        self.main_frame.columnconfigure(2, weight=1)
-        self.main_frame.rowconfigure(1, weight=1)
-
-        https://www.reddit.com/r/learnpython/comments/8cwmjm/tkinter_frame_not_expanding_to_fit_window/
-
-        self.grid = tk.Grid()
-
-        pack all here.
-        self.drag_and_drop_label.pack()
-        self.main_frame.pack()
-        self.grid.pack()"""
 
     def drop_inside_frame(self, event):
     
@@ -74,47 +53,59 @@ class UI:
             engineer_soup = wp.open_file_from_path(file_path)
             engineer_list = wp.create_engineer_list(engineer_soup)
             # add engineer rows in the main_frame
+            engineers_added = 0
             for engineer in engineer_list:
                 self.engineers.append(engineer)
-                self.add_engineer_row(parent=self.main_frame.grid,engineer=engineer)
+                self.add_engineer_row(parent=self, engineer=engineer)
                 
+                jobs_added = 0
                 for job in engineer.jobs:
-                    pass
+                    self.add_job_to_row(parent=self, row=engineers_added+1, column=jobs_added+1, job=job)
+                    jobs_added += 1
+                
+                engineers_added += 1
+
         else:
             print("file is innaccessable")
 
         print("dropped")
         
 
-    def add_job_to_row(self, row, column, job):
+    def add_job_to_row(self, parent, row, column, job):
         # add all the rows and columns one after the other
         # create job Class thing
-        job_box = JobBox(job)
-        self.main_frame.grid(row=row, column=column)
-        pass
+        job_box = JobBox(parent=parent, job=job)
+        job_box.grid(row=row, column=column)
         
-    def add_engineer_row(self, parent:tk.Widget, engineer:Engineer):
+        
+    def add_engineer_row(self, parent, engineer:Engineer):
         """adds a row to the parent grid
 
         Args:
             parent (tkinter.Widget): the parent that has the grid
             engineer (Engineer): and engineer class object 
         """
-        tmp_engineer_box = EngineerBox(parent, engineer)
-        tmp_engineer_box.grid(column=0, row=len(self.engineers)-1)
+        tmp_engineer_box = EngineerBox(parent=parent, engineer=engineer)
+        tmp_engineer_box.grid(column=0, row=len(self.engineers))
         print(f"adding engineer {str(engineer.name)} to grid")
 
-        pass
+
+
+class CanvasFrame(ttk.Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.grid(row=0, column=0)
 
 
 class EngineerBox(tk.Frame):
-    def __init__(self, container, engineer: Engineer):
-        super().__init__(self, container=container)
-        self.config(height=50, width=50, bd="00ff00")
-        self.grid(row=0, column=0)
+    def __init__(self, parent, engineer: Engineer):
+        super().__init__(parent)
+        self.config(height=50, width=100, background="grey")
 
+        self.grid(row=0, column=0)
+        
         self.name_label = tk.Label(self, text=engineer.name)
-        self.address_label = tk.Label(self, text=engineer.address)
+        self.address_label = tk.Label(self, text=f"{engineer.name[0]}.address")
         
         self.name_label.grid(row=0, column=0)
         self.address_label.grid(row=1, column=0)
@@ -124,14 +115,15 @@ class EngineerBox(tk.Frame):
         self.size = "50x15"
         # all labels that show details can be hidden
 
+
 class JobBox(tk.Frame):
-    def __init__(self, container, job:Job):
-        super().__init__(self, container=container)
-        self.config(height=50, width=70, bd="ff0000")
-        self.grid(column=0, row=0)
+    def __init__(self, parent, job:Job):
+        super().__init__(parent)
+        self.config(height=50, width=70, background="blue")
         
+        self.grid(column=0, row=0)
         self.description_label = tk.Label(self, text=job.description)
-        self.location_label = tk.Label(self, job.location)
+        self.location_label = tk.Label(self, text=job.location)
         self.duration_label = tk.Label(self, text=job.duration)
         self.id_label = tk.Label(self, text=job.id)
 

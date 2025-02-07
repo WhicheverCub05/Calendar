@@ -17,6 +17,4 @@ if __name__ == '__main__':
     # test_engineer_list = wp.create_engineer_list(test_data)
     # print(test_engineer_list)
 
-    root = TkinterDnD.Tk()
-    App = UI(master=root)
-    root.mainloop()
+    UI()

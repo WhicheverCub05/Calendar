@@ -1,6 +1,9 @@
 /.vscode
-__pycache__/
+/pycache/*
 *.py[cod]
+
+# extras
+scratch.py
 
 # C extensions
 *.so
@@ -26,3 +29,4 @@ pip-delete-this-directory.txt
 obj/__pycache__/engineer.cpython-312.pyc
 gui/__pycache__/gui.cpython-312.pyc
 web_parser/__pycache__/web_parser.cpython-312.pyc
+gui/__pycache__/gui.cpython-312.pyc

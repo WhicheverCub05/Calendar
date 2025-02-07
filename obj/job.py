@@ -13,7 +13,7 @@ class Job:
     
     @property
     def location(self):
-        return self.location
+        return self._location
     
     
     @location.setter
@@ -23,7 +23,7 @@ class Job:
     
     @property
     def duration(self):
-        return self.duration
+        return self._duration
 
 
     @duration.setter
@@ -33,7 +33,7 @@ class Job:
     
     @property
     def description(self):
-        return self.description
+        return self._description
     
 
     @description.setter
@@ -43,7 +43,7 @@ class Job:
 
     @property
     def id(self):
-        return self.id
+        return self._id
 
 
     @id.setter
