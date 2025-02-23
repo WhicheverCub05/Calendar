@@ -28,13 +28,42 @@ class UI(TkinterDnD.Tk):
         
         self.configure(background="slate blue")
 
-        #self.canvas = CanvasFrame(self)
-        self.drop_target_register(DND_FILES)
-        self.dnd_bind("<<Drop>>", self.drop_inside_frame)
-    
-        self.input_file_l = tk.Label(self, text="Waiting", border=2)
+
+        self.mf = tk.Frame(self, bg='blue')
         
-        self.input_file_l.grid(row=0, column=0)
+        self.canvas = CanvasFrame(self.mf)
+        
+
+        self.canvas.drop_target_register(DND_FILES)
+        self.canvas.dnd_bind("<<Drop>>", self.drop_inside_frame)
+
+        input_file_l = tk.Label(self, text="Waiting", border=2)
+
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+
+        self.mf.grid(sticky='nsew')
+        self.mf.columnconfigure(0, weight=1)
+        self.mf.rowconfigure(0, weight=1)
+        
+        self.canvas.grid(sticky='nsew')
+        self.canvas.columnconfigure(0, weight=1)
+        self.canvas.rowconfigure(0, weight=1)
+        
+        # scrollbars 
+        scrollbar_h = ttk.Scrollbar(self, orient='horizontal', command=self.canvas.xview)
+        scrollbar_v = tk.Scrollbar(self, orient='vertical', command=self.canvas.yview)
+        
+        self.canvas.configure(yscrollcommand = scrollbar_v.set)
+        self.canvas.configure(xscrollcommand = scrollbar_h.set)
+        self.canvas.bind('<MouseWheel>', lambda event: self.canvas.yview_scroll(-int(event.delta/60), "units"))
+        self.canvas.bind('<Control MouseWheel>', lambda event: self.canvas.xview_scroll(-int(event.delta/60), "units"))
+
+
+        scrollbar_v.place(relx=1, rely=0, relheight=1, anchor='ne')
+        scrollbar_h.place(relx=0, rely=1, relwidth=1, anchor='sw')
+        
+
         self.mainloop()
 
 
@@ -45,7 +74,7 @@ class UI(TkinterDnD.Tk):
         file_path = str(event.data)
         file_path = file_path.replace('{', '')
         file_path = file_path.replace('}', '')
-        self.input_file_l.config(text="Dropped!")
+        #self.input_file_l.config(text="Dropped!")
         print(f"Trying to open {file_path}")
 
         if os.path.isfile(file_path):
@@ -56,11 +85,11 @@ class UI(TkinterDnD.Tk):
             engineers_added = 0
             for engineer in engineer_list:
                 self.engineers.append(engineer)
-                self.add_engineer_row(parent=self, engineer=engineer)
+                self.add_engineer_row(parent=self.canvas, engineer=engineer)
                 
                 jobs_added = 0
                 for job in engineer.jobs:
-                    self.add_job_to_row(parent=self, row=engineers_added+1, column=jobs_added+1, job=job)
+                    self.add_job_to_row(parent=self.canvas, row=engineers_added+1, column=jobs_added+1, job=job)
                     jobs_added += 1
                 
                 engineers_added += 1
@@ -91,10 +120,10 @@ class UI(TkinterDnD.Tk):
 
 
 
-class CanvasFrame(ttk.Frame):
+class CanvasFrame(tk.Canvas):
     def __init__(self, parent):
-        super().__init__(parent)
-        self.grid(row=0, column=0)
+        super().__init__(parent, scrollregion = (0, 0, 2000, 5000), bg='red')
+        self.create_line(0, 0, 2000, 5000, fill='black', width=10)
 
 
 class EngineerBox(tk.Frame):
